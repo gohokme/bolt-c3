@@ -115,13 +115,15 @@ private:
   QWidget *map = nullptr;
   QHBoxLayout* split;
 
-#if  defined(QCOM2) || defined(QCOM)
+
 // neokii
 private:
+#if  defined(QCOM2) || defined(QCOM)
   ScreenRecoder* recorder;
   std::shared_ptr<QTimer> record_timer;
-  QPoint startPos;
 #endif
+  QPoint startPos;
+
 
 private slots:
   void offroadTransition(bool offroad);
