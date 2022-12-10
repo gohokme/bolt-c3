@@ -97,13 +97,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-scons-cache
 
-      - uses: actions/cache@v3
-        name: Cache pip binaries
-        with:
-          path: /home/runner/.cache/pip
-          key: ${{ runner.os }}-pip-cache-${{ steps.vars.outputs.sha_short }}
-          restore-keys: |
-            ${{ runner.os }}-pip-cache
+#      - uses: actions/cache@v3
+#        name: Cache pip binaries
+#        with:
+#          path: /home/runner/.cache/pip
+#          key: ${{ runner.os }}-pip-cache-${{ steps.vars.outputs.sha_short }}
+#          restore-keys: |
+#            ${{ runner.os }}-pip-cache
+
+
       - name: disable-man-db
         run : |
           sudo mv /usr/bin/mandb /usr/bin/mandb-OFF
@@ -136,6 +138,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.8.10'
+          cache: 'pip' # caching pip dependencies
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
