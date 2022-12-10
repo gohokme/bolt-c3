@@ -9,8 +9,9 @@
 
 #include <QTimer>
 #include <QMap>
+#if  defined(QCOM2) || defined(QCOM)
 #include "selfdrive/ui/qt/screenrecorder/screenrecorder.h"
-
+#endif
 
 // ***** onroad widgets *****
 
@@ -114,11 +115,13 @@ private:
   QWidget *map = nullptr;
   QHBoxLayout* split;
 
-  // neokii
+#if  defined(QCOM2) || defined(QCOM)
+// neokii
 private:
   ScreenRecoder* recorder;
   std::shared_ptr<QTimer> record_timer;
   QPoint startPos;
+#endif
 
 private slots:
   void offroadTransition(bool offroad);
