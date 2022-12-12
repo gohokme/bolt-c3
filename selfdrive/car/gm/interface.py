@@ -66,7 +66,7 @@ class CarInterface(CarInterfaceBase):
       if experimental_long:
         ret.pcmCruise = False
         ret.openpilotLongitudinalControl = True
-        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_GM_HW_CAM_LONG
+        # ret.safetyConfigs[0].safetyParam |= Panda.FLAG_GM_HW_CAM_LONG
 
         # Tuning
         ret.longitudinalTuning.kpV = [2.0, 1.5]
