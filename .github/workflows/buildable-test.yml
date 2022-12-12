@@ -156,7 +156,7 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: poetry
+      - name: Scons Build
         run : poetry run scons -u -j${{ steps.cpu-cores.outputs.count }} ;
 
       - name: apt-chmod
