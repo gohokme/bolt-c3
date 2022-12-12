@@ -200,3 +200,17 @@ EV_CAR = {CAR.VOLT, CAR.BOLT_EUV}
 CAMERA_ACC_CAR = {CAR.BOLT_EUV, CAR.SILVERADO, CAR.EQUINOX}
 
 STEER_THRESHOLD = 1.0
+
+
+def main():
+  cars = []
+  for member, value in vars(CAR).items():
+    if not member.startswith("_"):
+      cars.append(value)
+  cars.sort()
+  for c in cars:
+    print(c)
+
+if __name__ == "__main__":
+  main()
+
