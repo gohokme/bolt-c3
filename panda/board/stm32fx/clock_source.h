@@ -92,7 +92,7 @@ void clock_source_init(uint8_t mode){
       clock_source_mode = CLOCK_SOURCE_MODE_PWM;
       break;
     default:
-      print("Unknown clock source mode: "); puth(mode); print("\n");
+      puts("Unknown clock source mode: "); puth(mode); puts("\n");
       break;
   }
 }

@@ -1,8 +1,3 @@
-// Flasher and pedal use raw mailbox access
-#define GET_MAILBOX_BYTE(msg, b) (((int)(b) > 3) ? (((msg)->RDHR >> (8U * ((unsigned int)(b) % 4U))) & 0xFFU) : (((msg)->RDLR >> (8U * (unsigned int)(b))) & 0xFFU))
-#define GET_MAILBOX_BYTES_04(msg) ((msg)->RDLR)
-#define GET_MAILBOX_BYTES_48(msg) ((msg)->RDHR)
-
 // SAE 2284-3 : minimum 16 tq, SJW 3, sample point at 81.3%
 #define CAN_QUANTA 16U
 #define CAN_SEQ1 12U
@@ -16,7 +11,7 @@
 
 #define CAN_NAME_FROM_CANIF(CAN_DEV) (((CAN_DEV)==CAN1) ? "CAN1" : (((CAN_DEV) == CAN2) ? "CAN2" : "CAN3"))
 
-void print(const char *a);
+void puts(const char *a);
 
 // kbps multiplied by 10
 const uint32_t speeds[] = {100U, 200U, 500U, 1000U, 1250U, 2500U, 5000U, 10000U};
@@ -34,7 +29,7 @@ bool llcan_set_speed(CAN_TypeDef *CAN_obj, uint32_t speed, bool loopback, bool s
     timeout_counter++;
 
     if(timeout_counter >= CAN_INIT_TIMEOUT_MS){
-      print(CAN_NAME_FROM_CANIF(CAN_obj)); print(" set_speed timed out (1)!\n");
+      puts(CAN_NAME_FROM_CANIF(CAN_obj)); puts(" set_speed timed out (1)!\n");
       ret = false;
       break;
     }
@@ -65,7 +60,7 @@ bool llcan_set_speed(CAN_TypeDef *CAN_obj, uint32_t speed, bool loopback, bool s
       timeout_counter++;
 
       if(timeout_counter >= CAN_INIT_TIMEOUT_MS){
-        print(CAN_NAME_FROM_CANIF(CAN_obj)); print(" set_speed timed out (2)!\n");
+        puts(CAN_NAME_FROM_CANIF(CAN_obj)); puts(" set_speed timed out (2)!\n");
         ret = false;
         break;
       }
@@ -89,7 +84,7 @@ bool llcan_init(CAN_TypeDef *CAN_obj) {
     timeout_counter++;
 
     if(timeout_counter >= CAN_INIT_TIMEOUT_MS){
-      print(CAN_NAME_FROM_CANIF(CAN_obj)); print(" initialization timed out!\n");
+      puts(CAN_NAME_FROM_CANIF(CAN_obj)); puts(" initialization timed out!\n");
       ret = false;
       break;
     }
@@ -125,7 +120,7 @@ bool llcan_init(CAN_TypeDef *CAN_obj) {
         NVIC_EnableIRQ(CAN3_SCE_IRQn);
     #endif
     } else {
-      print("Invalid CAN: initialization failed\n");
+      puts("Invalid CAN: initialization failed\n");
     }
   }
   return ret;
