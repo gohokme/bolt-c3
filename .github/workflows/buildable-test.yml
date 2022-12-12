@@ -74,18 +74,18 @@ jobs:
         id: vars
         run: echo  "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Cache apt binaries
-        uses: actions/cache@v3
-        with:
-          path: |
-            /home/runner/.cache/apt
-#            !/var/cache/apt/archives/partial
-#            !/var/cache/apt/archives/lock
-#            !/var/lib/apt/lists
-#            !/var/lib/apt/lists/lock
-          key: ${{ runner.os }}-apt-cache-${{ steps.vars.outputs.sha_short }}
-          restore-keys: |
-            ${{ runner.os }}-apt-cache
+#      - name: Cache apt binaries
+#        uses: actions/cache@v3
+#        with:
+#          path: |
+#            /home/runner/.cache/apt
+##            !/var/cache/apt/archives/partial
+##            !/var/cache/apt/archives/lock
+##            !/var/lib/apt/lists
+##            !/var/lib/apt/lists/lock
+#          key: ${{ runner.os }}-apt-cache-${{ steps.vars.outputs.sha_short }}
+#          restore-keys: |
+#            ${{ runner.os }}-apt-cache
 
       - name: Cache scons binaries
         uses: actions/cache@v3
