@@ -170,6 +170,3 @@ jobs:
       - name: Scons Build
         run : poetry run scons -u -j${{ steps.cpu-cores.outputs.count }} ;
 
-      - name: apt-chmod
-        run : sudo chmod 777 -R /home/runner/.cache/apt/
-
