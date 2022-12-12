@@ -36,12 +36,7 @@ class CarInterface(CarInterfaceBase):
     return 0.04689655 * sigmoid * (v_ego + 10.028217)
 
   def get_steer_feedforward_function(self):
-    if self.CP.carFingerprint == CAR.VOLT:
-      return self.get_steer_feedforward_volt
-    elif self.CP.carFingerprint == CAR.ACADIA:
-      return self.get_steer_feedforward_acadia
-    else:
-      return CarInterfaceBase.get_steer_feedforward_default
+    return CarInterfaceBase.get_steer_feedforward_default
 
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long):
@@ -97,7 +92,8 @@ class CarInterface(CarInterfaceBase):
     # These cars have been put into dashcam only due to both a lack of users and test coverage.
     # These cars likely still work fine. Once a user confirms each car works and a test route is
     # added to selfdrive/car/tests/routes.py, we can remove it from this list.
-    ret.dashcamOnly = candidate in {CAR.CADILLAC_ATS, CAR.HOLDEN_ASTRA, CAR.MALIBU, CAR.BUICK_REGAL, CAR.EQUINOX}
+    # ret.dashcamOnly = candidate not in {CAR.CADILLAC_ATS, CAR.HOLDEN_ASTRA, CAR.MALIBU, CAR.BUICK_REGAL, CAR.EQUINOX}
+    ret.dashcamOnly = False
 
     # Start with a baseline tuning for all GM vehicles. Override tuning as needed in each model section below.
     # Some GMs need some tolerance above 10 kph to avoid a fault
