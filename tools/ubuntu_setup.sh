@@ -104,32 +104,32 @@ function install_ubuntu_focal_requirements() {
 }
 
 # Detect OS using /etc/os-release file
-if [ -f "/etc/os-release" ]; then
-  source /etc/os-release
-  case "$VERSION_CODENAME" in
-    "jammy")
-      install_ubuntu_jammy_requirements
-      ;;
-    "focal")
-      install_ubuntu_focal_requirements
-      ;;
-    *)
-      echo "$ID $VERSION_ID is unsupported. This setup script is written for Ubuntu 20.04."
-      read -p "Would you like to attempt installation anyway? " -n 1 -r
-      echo ""
-      if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-      fi
-      if [ "$UBUNTU_CODENAME" = "jammy" ]; then
-        install_ubuntu_jammy_requirements
-      else
-        install_ubuntu_focal_requirements
-      fi
-  esac
-else
-  echo "No /etc/os-release in the system"
-  exit 1
-fi
+#if [ -f "/etc/os-release" ]; then
+#  source /etc/os-release
+#  case "$VERSION_CODENAME" in
+#    "jammy")
+#      install_ubuntu_jammy_requirements
+#      ;;
+#    "focal")
+#      install_ubuntu_focal_requirements
+#      ;;
+#    *)
+#      echo "$ID $VERSION_ID is unsupported. This setup script is written for Ubuntu 20.04."
+#      read -p "Would you like to attempt installation anyway? " -n 1 -r
+#      echo ""
+#      if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+#        exit 1
+#      fi
+#      if [ "$UBUNTU_CODENAME" = "jammy" ]; then
+#        install_ubuntu_jammy_requirements
+#      else
+#        install_ubuntu_focal_requirements
+#      fi
+#  esac
+#else
+#  echo "No /etc/os-release in the system"
+#  exit 1
+#fi
 
 
 # install python dependencies
