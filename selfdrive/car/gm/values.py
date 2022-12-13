@@ -61,7 +61,7 @@ class CarControllerParams:
 
 
 class CAR:
-  BOLT_EV = "BOLT EV 2017-19"
+  BOLT_EV = "CHEVROLET BOLT EV"
 
 
 
@@ -85,7 +85,7 @@ class GMCarInfo(CarInfo):
 
 
 CAR_INFO: Dict[str, Union[GMCarInfo, List[GMCarInfo]]] = {
-  CAR.BOLT_EV: GMCarInfo("BOLT EV 2017-19"),
+  CAR.BOLT_EV: GMCarInfo("CHEVROLET BOLT EV"),
 
 }
 
