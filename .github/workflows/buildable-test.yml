@@ -95,9 +95,9 @@ jobs:
         with:
           path: |
             /tmp/scons_cache
-          key: ${{ runner.os }}-scons-cache-${{ steps.vars.outputs.sha_short }}
+          key: ${{ runner.os }}-scons-cache-${{ github.head_ref }}
           restore-keys: |
-            ${{ runner.os }}-scons-cache
+            ${{ runner.os }}-scons-cache-${{ github.head_ref }}
 
 #      - uses: actions/cache@v3
 #        name: Cache pip binaries
