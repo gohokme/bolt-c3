@@ -5,7 +5,7 @@ from panda import Panda
 p = Panda()
 
 while True:
-  p.set_safety_mode(Panda.SAFETY_TOYOTA)
+  p.set_safety_mode(Panda.SAFETY_HYUNDAI_LEGACY)
   p.send_heartbeat()
   print("ON")
   time.sleep(1)
