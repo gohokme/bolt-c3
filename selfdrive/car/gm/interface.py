@@ -5,7 +5,7 @@ from panda import Panda
 
 from common.conversions import Conversions as CV
 from selfdrive.car import STD_CARGO_KG, create_button_event, scale_tire_stiffness, get_safety_config
-from selfdrive.car.gm.values import CAR, CruiseButtons, CarControllerParams, EV_CAR, CAMERA_ACC_CAR
+from selfdrive.car.gm.values import CAR, Buttons, CarControllerParams, EV_CAR, CAMERA_ACC_CAR
 from selfdrive.car.interfaces import CarInterfaceBase
 
 ButtonType = car.CarState.ButtonEvent.Type
@@ -13,8 +13,8 @@ EventName = car.CarEvent.EventName
 GearShifter = car.CarState.GearShifter
 TransmissionType = car.CarParams.TransmissionType
 NetworkLocation = car.CarParams.NetworkLocation
-BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.DECEL_SET: ButtonType.decelCruise,
-                CruiseButtons.MAIN: ButtonType.altButton3, CruiseButtons.CANCEL: ButtonType.cancel}
+BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.DECEL_SET: ButtonType.decelCruise,
+                Buttons.MAIN: ButtonType.altButton3, Buttons.CANCEL: ButtonType.cancel}
 
 
 class CarInterface(CarInterfaceBase):
@@ -133,11 +133,11 @@ class CarInterface(CarInterfaceBase):
   def _update(self, c):
     ret = self.CS.update(self.cp, self.cp_cam, self.cp_loopback)
 
-    if self.CS.cruise_buttons != self.CS.prev_cruise_buttons and self.CS.prev_cruise_buttons != CruiseButtons.INIT:
-      buttonEvents = [create_button_event(self.CS.cruise_buttons, self.CS.prev_cruise_buttons, BUTTONS_DICT, CruiseButtons.UNPRESS)]
+    if self.CS.cruise_buttons[-1] != self.CS.prev_cruise_buttons and self.CS.prev_cruise_buttons != Buttons.NONE:
+      buttonEvents = [create_button_event(self.CS.cruise_buttons, self.CS.prev_cruise_buttons, BUTTONS_DICT, Buttons.UNPRESS)]
       # Handle ACCButtons changing buttons mid-press
-      if self.CS.cruise_buttons != CruiseButtons.UNPRESS and self.CS.prev_cruise_buttons != CruiseButtons.UNPRESS:
-        buttonEvents.append(create_button_event(CruiseButtons.UNPRESS, self.CS.prev_cruise_buttons, BUTTONS_DICT, CruiseButtons.UNPRESS))
+      if self.CS.cruise_buttons[-1] != Buttons.UNPRESS and self.CS.prev_cruise_buttons != Buttons.UNPRESS:
+        buttonEvents.append(create_button_event(Buttons.UNPRESS, self.CS.prev_cruise_buttons, BUTTONS_DICT, Buttons.UNPRESS))
 
       ret.buttonEvents = buttonEvents
 

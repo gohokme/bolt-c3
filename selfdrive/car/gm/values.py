@@ -90,8 +90,8 @@ CAR_INFO: Dict[str, Union[GMCarInfo, List[GMCarInfo]]] = {
 }
 
 
-class CruiseButtons:
-  INIT = 0
+class Buttons:
+  NONE = 0
   UNPRESS = 1
   RES_ACCEL = 2
   DECEL_SET = 3

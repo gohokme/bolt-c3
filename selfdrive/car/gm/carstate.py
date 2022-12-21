@@ -1,3 +1,4 @@
+from collections import deque
 import copy
 from cereal import car
 from common.conversions import Conversions as CV
@@ -5,11 +6,14 @@ from common.numpy_fast import mean
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from selfdrive.car.interfaces import CarStateBase
-from selfdrive.car.gm.values import DBC, AccState, CanBus, STEER_THRESHOLD
+from selfdrive.car.gm.values import DBC, AccState, CanBus, STEER_THRESHOLD, Buttons
 
 TransmissionType = car.CarParams.TransmissionType
 NetworkLocation = car.CarParams.NetworkLocation
 STANDSTILL_THRESHOLD = 10 * 0.0311 * CV.KPH_TO_MS
+
+PREV_BUTTON_SAMPLES = 8
+CLUSTER_SAMPLE_RATE = 20  # frames
 
 
 class CarState(CarStateBase):
@@ -21,11 +25,15 @@ class CarState(CarStateBase):
     self.camera_lka_steering_cmd_counter = 0
     self.buttons_counter = 0
 
+    self.cruise_buttons = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
+    # self.main_buttons = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
+
+
   def update(self, pt_cp, cam_cp, loopback_cp):
     ret = car.CarState.new_message()
 
-    self.prev_cruise_buttons = self.cruise_buttons
-    self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]["ACCButtons"]
+    self.prev_cruise_buttons = self.cruise_buttons[-1]
+    self.cruise_buttons.extend(pt_cp.vl["ASCMSteeringButton"]["ACCButtons"])
     self.buttons_counter = pt_cp.vl["ASCMSteeringButton"]["RollingCounter"]
     self.pscm_status = copy.copy(pt_cp.vl["PSCMStatus"])
     self.moving_backward = pt_cp.vl["EBCMWheelSpdRear"]["MovingBackward"] != 0
