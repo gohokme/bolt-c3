@@ -8,7 +8,7 @@ from selfdrive.athena.registration import is_registered_device
 from system.hardware import HARDWARE, PC
 from system.swaglog import cloudlog
 from system.version import get_branch, get_commit, get_origin, get_version, \
-                              is_comma_remote, is_dirty, is_tested_branch
+                              is_jc01rho_remote, is_dirty, is_tested_branch
 
 
 
@@ -48,12 +48,12 @@ def set_tag(key: str, value: str) -> None:
 
 def init(project: SentryProject) -> None:
   # forks like to mess with this, so double check
-  comma_remote = is_comma_remote() and "commaai" in get_origin(default="")
-  if not comma_remote or not is_registered_device() or PC:
+  jc01rho_remote = is_jc01rho_remote() and "commaai" in get_origin(default="")
+  if not jc01rho_remote or PC : # or not is_registered_device() :
     return
 
   env = "release" if is_tested_branch() else "master"
-  dongle_id = Params().get("DongleId", encoding='utf-8')
+  # dongle_id = Params().get("DongleId", encoding='utf-8')
 
   integrations = []
   if project == SentryProject.SELFDRIVE:
@@ -68,7 +68,7 @@ def init(project: SentryProject) -> None:
                   traces_sample_rate=1.0,
                   environment=env)
 
-  sentry_sdk.set_user({"id": dongle_id})
+  # sentry_sdk.set_user({"id": dongle_id})
   sentry_sdk.set_tag("dirty", is_dirty())
   sentry_sdk.set_tag("origin", get_origin())
   sentry_sdk.set_tag("branch", get_branch())

@@ -83,14 +83,14 @@ def is_prebuilt() -> bool:
 
 
 @cache
-def is_comma_remote() -> bool:
+def is_jc01rho_remote() -> bool:
   # note to fork maintainers, this is used for release metrics. please do not
   # touch this to get rid of the orange startup alert. there's better ways to do that
   origin: Optional[str] = get_origin()
   if origin is None:
     return False
 
-  return origin.startswith('git@github.com:commaai') or origin.startswith('https://github.com/commaai')
+  return origin.startswith('git@github.com:jc01rho-openpilot') or origin.startswith('https://github.com/jc01rho-openpilot')
 
 
 @cache
