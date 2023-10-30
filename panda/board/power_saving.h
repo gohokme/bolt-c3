@@ -12,19 +12,34 @@ void set_power_save_state(int state) {
   if (is_valid_state && (state != power_save_status)) {
     bool enable = false;
     if (state == POWER_SAVE_STATUS_ENABLED) {
-      puts("enable power savings\n");
+      print("enable power savings\n");
       if (current_board->has_gps) {
         const char UBLOX_SLEEP_MSG[] = "\xb5\x62\x06\x04\x04\x00\x01\x00\x08\x00\x17\x78";
         uart_ring *ur = get_ring_by_number(1);
         for (unsigned int i = 0; i < sizeof(UBLOX_SLEEP_MSG) - 1U; i++) while (!putc(ur, UBLOX_SLEEP_MSG[i]));
       }
+      // Disable CAN interrupts
+      if (harness.status == HARNESS_STATUS_FLIPPED) {
+        llcan_irq_disable(cans[0]);
+      } else {
+        llcan_irq_disable(cans[2]);
+      }
+      llcan_irq_disable(cans[1]);
     } else {
-      puts("disable power savings\n");
+      print("disable power savings\n");
       if (current_board->has_gps) {
         const char UBLOX_WAKE_MSG[] = "\xb5\x62\x06\x04\x04\x00\x01\x00\x09\x00\x18\x7a";
         uart_ring *ur = get_ring_by_number(1);
         for (unsigned int i = 0; i < sizeof(UBLOX_WAKE_MSG) - 1U; i++) while (!putc(ur, UBLOX_WAKE_MSG[i]));
       }
+
+      if (harness.status == HARNESS_STATUS_FLIPPED) {
+        llcan_irq_enable(cans[0]);
+      } else {
+        llcan_irq_enable(cans[2]);
+      }
+      llcan_irq_enable(cans[1]);
+
       enable = true;
     }
 

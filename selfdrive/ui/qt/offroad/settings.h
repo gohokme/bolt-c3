@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QButtonGroup>
-#include <QFileSystemWatcher>
 #include <QFrame>
 #include <QLabel>
 #include <QPushButton>
@@ -10,6 +9,7 @@
 #include <QStackedLayout>
 
 
+#include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/widgets/controls.h"
 
 // ********** settings window + top-level panels **********
@@ -18,6 +18,7 @@ class SettingsWindow : public QFrame {
 
 public:
   explicit SettingsWindow(QWidget *parent = 0);
+  void setCurrentPanel(int index, const QString &param = "");
 
 protected:
   void showEvent(QShowEvent *event) override;
@@ -26,6 +27,7 @@ signals:
   void closeSettings();
   void reviewTrainingGuide();
   void showDriverView();
+  void expandToggleDescription(const QString &param);
 
 private:
   QPushButton *sidebar_alert_widget;
@@ -41,7 +43,6 @@ public:
 signals:
   void reviewTrainingGuide();
   void showDriverView();
-  void closeSettings();
 
 private slots:
   void poweroff();
@@ -58,9 +59,13 @@ public:
   explicit TogglesPanel(SettingsWindow *parent);
   void showEvent(QShowEvent *event) override;
 
+public slots:
+  void expandToggleDescription(const QString &param);
+
 private:
   Params params;
   std::map<std::string, ParamControl*> toggles;
+  ButtonParamControl *long_personality_setting;
 
   void updateToggles();
 };
@@ -84,7 +89,7 @@ private:
   ButtonControl *targetBranchBtn;
 
   Params params;
-  QFileSystemWatcher *fs_watch;
+  ParamWatcher *fs_watch;
 };
 
 
@@ -103,31 +108,91 @@ signals:
 
 };
 
-class LateralControl : public QWidget {
-  Q_OBJECT
-public:
-  explicit LateralControl(QWidget* parent = 0);
+class CommunityPanel : public QWidget {
+    Q_OBJECT
 
 private:
+    QStackedLayout* main_layout = nullptr;
+    QWidget* homeScreen = nullptr;
+    SelectCar* selectCar = nullptr;
 
-signals:
-  void backPress();
-  void selected();
+    QWidget* homeWidget;
 
+public:
+    explicit CommunityPanel(QWidget* parent = nullptr);
+};
+class TuningPanel : public QWidget {
+    Q_OBJECT
+
+private:
+    QStackedLayout* main_layout = nullptr;
+    QWidget* homeScreen = nullptr;
+
+    QWidget* homeWidget;
+
+public:
+    explicit TuningPanel(QWidget* parent = nullptr);
+};
+class CruisePanel : public QWidget {
+    Q_OBJECT
+
+private:
+    QStackedLayout* main_layout = nullptr;
+    QWidget* homeScreen = nullptr;
+
+    QWidget* homeWidget;
+
+public:
+    explicit CruisePanel(QWidget* parent = nullptr);
 };
 
-class CommunityPanel : public QWidget {
-  Q_OBJECT
-
-private:
-  QStackedLayout* main_layout = nullptr;
-  QWidget* homeScreen = nullptr;
-  SelectCar* selectCar = nullptr;
-  LateralControl* lateralControl = nullptr;
-
-  QWidget* homeWidget;
+// ajouatom:
+class CValueControl : public AbstractControl {
+    Q_OBJECT
 
 public:
-  explicit CommunityPanel(QWidget *parent = nullptr);
+    CValueControl(const QString& params, const QString& title, const QString& desc, const QString& icon, int min, int max, int unit = 1);
+
+private:
+    QPushButton btnplus;
+    QPushButton btnminus;
+    QLabel label;
+
+    QString m_params;
+    int     m_min;
+    int     m_max;
+    int     m_unit;
+
+    void refresh();
+};
+class CPrebuiltToggle : public ToggleControl {
+    Q_OBJECT
+
+public:
+    CPrebuiltToggle() : ToggleControl("Prebuilt", "Prebuilt.", "../assets/offroad/icon_shell.png", Params().getBool("OpkrPrebuiltOn")) {
+        QObject::connect(this, &CPrebuiltToggle::toggleFlipped, [=](int state) {
+            Params().putBool("OpkrPrebuiltOn", (bool)state);
+
+            if (state)
+            {
+                std::system("cd /data/openpilot; touch prebuilt");
+            }
+            else
+            {
+                std::system("cd /data/openpilot; rm -f prebuilt");
+            }
+
+        });
+    }
+};
+class GitHash : public AbstractControl {
+    Q_OBJECT
+
+public:
+    GitHash();
+
+private:
+    QLabel local_hash;
+    QLabel remote_hash;
 };
 
