@@ -1,3 +1,8 @@
+// Flasher and pedal use raw mailbox access
+#define GET_MAILBOX_BYTE(msg, b) (((int)(b) > 3) ? (((msg)->RDHR >> (8U * ((unsigned int)(b) % 4U))) & 0xFFU) : (((msg)->RDLR >> (8U * (unsigned int)(b))) & 0xFFU))
+#define GET_MAILBOX_BYTES_04(msg) ((msg)->RDLR)
+#define GET_MAILBOX_BYTES_48(msg) ((msg)->RDHR)
+
 // SAE 2284-3 : minimum 16 tq, SJW 3, sample point at 81.3%
 #define CAN_QUANTA 16U
 #define CAN_SEQ1 12U
@@ -11,7 +16,7 @@
 
 #define CAN_NAME_FROM_CANIF(CAN_DEV) (((CAN_DEV)==CAN1) ? "CAN1" : (((CAN_DEV) == CAN2) ? "CAN2" : "CAN3"))
 
-void puts(const char *a);
+void print(const char *a);
 
 // kbps multiplied by 10
 const uint32_t speeds[] = {100U, 200U, 500U, 1000U, 1250U, 2500U, 5000U, 10000U};
@@ -29,7 +34,7 @@ bool llcan_set_speed(CAN_TypeDef *CAN_obj, uint32_t speed, bool loopback, bool s
     timeout_counter++;
 
     if(timeout_counter >= CAN_INIT_TIMEOUT_MS){
-      puts(CAN_NAME_FROM_CANIF(CAN_obj)); puts(" set_speed timed out (1)!\n");
+      print(CAN_NAME_FROM_CANIF(CAN_obj)); print(" set_speed timed out (1)!\n");
       ret = false;
       break;
     }
@@ -60,7 +65,7 @@ bool llcan_set_speed(CAN_TypeDef *CAN_obj, uint32_t speed, bool loopback, bool s
       timeout_counter++;
 
       if(timeout_counter >= CAN_INIT_TIMEOUT_MS){
-        puts(CAN_NAME_FROM_CANIF(CAN_obj)); puts(" set_speed timed out (2)!\n");
+        print(CAN_NAME_FROM_CANIF(CAN_obj)); print(" set_speed timed out (2)!\n");
         ret = false;
         break;
       }
@@ -68,6 +73,44 @@ bool llcan_set_speed(CAN_TypeDef *CAN_obj, uint32_t speed, bool loopback, bool s
   }
 
   return ret;
+}
+
+void llcan_irq_disable(CAN_TypeDef *CAN_obj) {
+  if (CAN_obj == CAN1) {
+    NVIC_DisableIRQ(CAN1_TX_IRQn);
+    NVIC_DisableIRQ(CAN1_RX0_IRQn);
+    NVIC_DisableIRQ(CAN1_SCE_IRQn);
+  } else if (CAN_obj == CAN2) {
+    NVIC_DisableIRQ(CAN2_TX_IRQn);
+    NVIC_DisableIRQ(CAN2_RX0_IRQn);
+    NVIC_DisableIRQ(CAN2_SCE_IRQn);
+  #ifdef CAN3
+    } else if (CAN_obj == CAN3) {
+      NVIC_DisableIRQ(CAN3_TX_IRQn);
+      NVIC_DisableIRQ(CAN3_RX0_IRQn);
+      NVIC_DisableIRQ(CAN3_SCE_IRQn);
+  #endif
+  } else {
+  }
+}
+
+void llcan_irq_enable(CAN_TypeDef *CAN_obj) {
+  if (CAN_obj == CAN1) {
+    NVIC_EnableIRQ(CAN1_TX_IRQn);
+    NVIC_EnableIRQ(CAN1_RX0_IRQn);
+    NVIC_EnableIRQ(CAN1_SCE_IRQn);
+  } else if (CAN_obj == CAN2) {
+    NVIC_EnableIRQ(CAN2_TX_IRQn);
+    NVIC_EnableIRQ(CAN2_RX0_IRQn);
+    NVIC_EnableIRQ(CAN2_SCE_IRQn);
+  #ifdef CAN3
+    } else if (CAN_obj == CAN3) {
+      NVIC_EnableIRQ(CAN3_TX_IRQn);
+      NVIC_EnableIRQ(CAN3_RX0_IRQn);
+      NVIC_EnableIRQ(CAN3_SCE_IRQn);
+  #endif
+  } else {
+  }
 }
 
 bool llcan_init(CAN_TypeDef *CAN_obj) {
@@ -84,7 +127,7 @@ bool llcan_init(CAN_TypeDef *CAN_obj) {
     timeout_counter++;
 
     if(timeout_counter >= CAN_INIT_TIMEOUT_MS){
-      puts(CAN_NAME_FROM_CANIF(CAN_obj)); puts(" initialization timed out!\n");
+      print(CAN_NAME_FROM_CANIF(CAN_obj)); print(" initialization timed out!\n");
       ret = false;
       break;
     }
@@ -105,23 +148,10 @@ bool llcan_init(CAN_TypeDef *CAN_obj) {
     // enable certain CAN interrupts
     register_set_bits(&(CAN_obj->IER), CAN_IER_TMEIE | CAN_IER_FMPIE0 | CAN_IER_ERRIE | CAN_IER_LECIE | CAN_IER_BOFIE | CAN_IER_EPVIE | CAN_IER_EWGIE | CAN_IER_FOVIE0 | CAN_IER_FFIE0);
 
-    if (CAN_obj == CAN1) {
-      NVIC_EnableIRQ(CAN1_TX_IRQn);
-      NVIC_EnableIRQ(CAN1_RX0_IRQn);
-      NVIC_EnableIRQ(CAN1_SCE_IRQn);
-    } else if (CAN_obj == CAN2) {
-      NVIC_EnableIRQ(CAN2_TX_IRQn);
-      NVIC_EnableIRQ(CAN2_RX0_IRQn);
-      NVIC_EnableIRQ(CAN2_SCE_IRQn);
-    #ifdef CAN3
-      } else if (CAN_obj == CAN3) {
-        NVIC_EnableIRQ(CAN3_TX_IRQn);
-        NVIC_EnableIRQ(CAN3_RX0_IRQn);
-        NVIC_EnableIRQ(CAN3_SCE_IRQn);
-    #endif
-    } else {
-      puts("Invalid CAN: initialization failed\n");
-    }
+    // clear overrun flag on init
+    CAN_obj->RF0R &= ~(CAN_RF0R_FOVR0);
+
+    llcan_irq_enable(CAN_obj);
   }
   return ret;
 }

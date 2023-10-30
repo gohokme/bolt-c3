@@ -30,7 +30,7 @@ services = {
   "temperatureSensor": (True, 100., 100),
   "gpsNMEA": (True, 9.),
   "deviceState": (True, 2., 1),
-  "can": (True, 100.),
+  "can": (True, 100., 1223),  # decimation gives ~5 msgs in a full segment
   "controlsState": (True, 100., 10),
   "pandaStates": (True, 2., 1),
   "peripheralState": (True, 2., 1),
@@ -46,7 +46,7 @@ services = {
   "carState": (True, 100., 10),
   "carControl": (True, 100., 10),
   "longitudinalPlan": (True, 20., 5),
-  "procLog": (True, 0.5),
+  "procLog": (True, 0.5, 15),
   "gpsLocationExternal": (True, 10., 10),
   "gpsLocation": (True, 1., 1),
   "ubloxGnss": (True, 10.),
@@ -74,16 +74,27 @@ services = {
   "navInstruction": (True, 1., 10),
   "navRoute": (True, 0.),
   "navThumbnail": (True, 0.),
+  "navModel": (True, 2., 4.),
+  "mapRenderState": (True, 2., 1.),
+  "uiPlan": (True, 20., 40.),
   "qRoadEncodeIdx": (False, 20.),
   "userFlag": (True, 0., 1),
+  "microphone": (True, 10., 10),
   "roadLimitSpeed": (False, 0.),
 
   # debug
+  "uiDebug": (True, 0., 1),
   "testJoystick": (True, 0.),
   "roadEncodeData": (False, 20.),
   "driverEncodeData": (False, 20.),
   "wideRoadEncodeData": (False, 20.),
   "qRoadEncodeData": (False, 20.),
+  "livestreamWideRoadEncodeIdx": (False, 20.),
+  "livestreamRoadEncodeIdx": (False, 20.),
+  "livestreamDriverEncodeIdx": (False, 20.),
+  "livestreamWideRoadEncodeData": (False, 20.),
+  "livestreamRoadEncodeData": (False, 20.),
+  "livestreamDriverEncodeData": (False, 20.),
 }
 service_list = {name: Service(new_port(idx), *vals) for  # type: ignore
                 idx, (name, vals) in enumerate(services.items())}

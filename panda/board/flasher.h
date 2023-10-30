@@ -1,6 +1,7 @@
 // flasher state variables
 uint32_t *prog_ptr = NULL;
-bool unlocked = false;
+
+void spi_init(void);
 
 #ifdef uart_ring
 void debug_ring_callback(uart_ring *ring) {}
@@ -31,15 +32,26 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
         resp[1] = 0xff;
       }
       current_board->set_led(LED_GREEN, 1);
-      unlocked = true;
       prog_ptr = (uint32_t *)APP_START_ADDRESS;
       break;
     // **** 0xb2: erase sector
     case 0xb2:
       sec = req->param1;
-      if (flash_erase_sector(sec, unlocked)) {
+      if (flash_erase_sector(sec)) {
         resp[1] = 0xff;
       }
+      break;
+    // **** 0xc1: get hardware type
+    case 0xc1:
+      resp[0] = hw_type;
+      resp_len = 1;
+      break;
+    // **** 0xc3: fetch MCU UID
+    case 0xc3:
+      #ifdef UID_BASE
+        (void)memcpy(resp, ((uint8_t *)UID_BASE), 12);
+        resp_len = 12;
+      #endif
       break;
     // **** 0xd0: fetch serial number
     case 0xd0:
@@ -59,12 +71,12 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
       // this allows reflashing of the bootstub
       switch (req->param1) {
         case 0:
-          puts("-> entering bootloader\n");
+          print("-> entering bootloader\n");
           enter_bootloader_mode = ENTER_BOOTLOADER_MAGIC;
           NVIC_SystemReset();
           break;
         case 1:
-          puts("-> entering softloader\n");
+          print("-> entering softloader\n");
           enter_bootloader_mode = ENTER_SOFTLOADER_MAGIC;
           NVIC_SystemReset();
           break;
@@ -96,7 +108,7 @@ int comms_can_read(uint8_t *data, uint32_t max_len) {
   return 0;
 }
 
-void usb_cb_ep3_out_complete(void) {}
+void refresh_can_tx_slots_available(void) {}
 
 void comms_endpoint2_write(uint8_t *data, uint32_t len) {
   current_board->set_led(LED_RED, 0);
@@ -113,11 +125,11 @@ void comms_endpoint2_write(uint8_t *data, uint32_t len) {
 int spi_cb_rx(uint8_t *data, int len, uint8_t *data_out) {
   UNUSED(len);
   ControlPacket_t control_req;
-  
+
   int resp_len = 0;
   switch (data[0]) {
     case 0:
-      // control transfer      
+      // control transfer
       control_req.request = ((USB_Setup_TypeDef *)(data+4))->b.bRequest;
       control_req.param1 = ((USB_Setup_TypeDef *)(data+4))->b.wValue.w;
       control_req.param2 = ((USB_Setup_TypeDef *)(data+4))->b.wIndex.w;
@@ -256,7 +268,7 @@ void soft_flasher_start(void) {
     REGISTER_INTERRUPT(CAN1_SCE_IRQn, CAN1_SCE_IRQ_Handler, CAN_INTERRUPT_RATE, FAULT_INTERRUPT_RATE_CAN_1)
   #endif
 
-  puts("\n\n\n************************ FLASHER START ************************\n");
+  print("\n\n\n************************ FLASHER START ************************\n");
 
   enter_bootloader_mode = 0;
 
@@ -281,6 +293,12 @@ void soft_flasher_start(void) {
 
   // enable USB
   usb_init();
+
+  // enable SPI
+  if (current_board->has_spi) {
+    gpio_spi_init();
+    spi_init();
+  }
 
   // green LED on for flashing
   current_board->set_led(LED_GREEN, 1);

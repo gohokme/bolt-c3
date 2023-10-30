@@ -41,7 +41,12 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
     QPushButton *rebootBtn = new QPushButton(tr("Reboot and Update"));
     rebootBtn->setFixedSize(600, 125);
     footer_layout->addWidget(rebootBtn, 0, Qt::AlignBottom | Qt::AlignRight);
-    QObject::connect(rebootBtn, &QPushButton::clicked, [=]() { Hardware::reboot(); });
+    QObject::connect(rebootBtn, &QPushButton::clicked, [=]() { 
+        const char* gitpull = "/data/openpilot/selfdrive/assets/addon/sh/gitpull.sh";
+        std::system("cd /data/openpilot; rm -f prebuilt");
+        std::system(gitpull);
+        Hardware::reboot();
+    });
   }
 
   setStyleSheet(R"(
@@ -92,7 +97,11 @@ int OffroadAlert::refresh() {
     std::string bytes = params.get(key);
     if (bytes.size()) {
       auto doc_par = QJsonDocument::fromJson(bytes.c_str());
-      text = doc_par["text"].toString();
+      text = tr(doc_par["text"].toString().toUtf8().data());
+      auto extra = doc_par["extra"].toString();
+      if (!extra.isEmpty()) {
+        text = text.arg(extra);
+      }
     }
     label->setText(text);
     label->setVisible(!text.isEmpty());
